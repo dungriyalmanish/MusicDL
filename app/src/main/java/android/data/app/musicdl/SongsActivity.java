@@ -7,10 +7,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.data.app.musicdl.database.MusicData;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.method.KeyListener;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,7 +43,8 @@ public class SongsActivity extends AppCompatActivity implements IMusicCardListen
     DownloadBroadcastReceiver br;
     Intent data;
     IntentFilter intentFilter;
-
+    SharedPreferences sp;
+    static int max_list = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +58,13 @@ public class SongsActivity extends AppCompatActivity implements IMusicCardListen
         songsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         songsRecycler.setHasFixedSize(true);
         songsRecycler.setAdapter(songsAdapter);
+
         br = new DownloadBroadcastReceiver();
+        sp = getPreferences(MODE_PRIVATE);
+        max_list = sp.getInt(MusicConstants.MAX_LIST, 5);
         intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         intentFilter.addAction(MusicConstants.ACTION_FILE_EXIST);
+        intentFilter.addAction(MusicConstants.ACTION_DOWNLOAD_MUSIC);
         //musicLoader.loadMusic();
     }
 
@@ -59,10 +72,43 @@ public class SongsActivity extends AppCompatActivity implements IMusicCardListen
     protected void onStart() {
         super.onStart();
         if (songsAdapter.getItemCount() == 0) {
-            musicLoader.loadMusic();
+            musicLoader.loadMusic(max_list);
         }
         if (br != null)
             registerReceiver(br, intentFilter);
+        searchText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String search = editable.toString();
+                Log.v(TAG, "searching " + search);
+                songsAdapter.clearAll();
+                if (search.matches("#[0-9]+#")) {
+                    Log.v(TAG, "search text matches super code");
+                    SharedPreferences.Editor edit = sp.edit();
+                    max_list = Integer.parseInt(search.substring(1, search.length() - 1));
+                    musicLoader.loadMusic(max_list);
+                    edit.putInt(MusicConstants.MAX_LIST, max_list);
+                    edit.apply();
+                    searchText.setText("");
+
+                } else {
+                    musicLoader.searchMusic(search);
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -88,13 +134,16 @@ public class SongsActivity extends AppCompatActivity implements IMusicCardListen
     private void downloadMusic(MusicData musicData, boolean skip, @Nullable String... intent_data) {
         data = new Intent(this, MusicDLService.class);
         data.setAction(MusicConstants.ACTION_DOWNLOAD_MUSIC);
+        String uri, name;
         if (!skip) {
-            data.putExtra(MusicConstants.EXTRA_MUSIC_URI, MusicConstants.DOWNLOAD_URL + musicData.id);
-            data.putExtra(MusicConstants.EXTRA_MUSIC_NAME, musicData.name + "-" + musicData.artist + ".mp3");
+            uri = MusicConstants.DOWNLOAD_URL + musicData.id;
+            name = musicData.name + "-" + musicData.artist + ".mp3";
         } else {
-            data.putExtra(MusicConstants.EXTRA_MUSIC_URI, intent_data[0]);
-            data.putExtra(MusicConstants.EXTRA_MUSIC_NAME, intent_data[1]);
+            uri = intent_data[0];
+            name = intent_data[1];
         }
+        data.putExtra(MusicConstants.EXTRA_MUSIC_URI, uri);
+        data.putExtra(MusicConstants.EXTRA_MUSIC_NAME, name);
         data.putExtra(MusicConstants.EXTRA_SKIP, skip);
         startService(data);
     }
@@ -121,6 +170,7 @@ public class SongsActivity extends AppCompatActivity implements IMusicCardListen
         songsAdapter.addData(md);
     }
 
+
     private class DownloadBroadcastReceiver extends BroadcastReceiver {
         DownloadBroadcastReceiver() {
         }
@@ -131,6 +181,8 @@ public class SongsActivity extends AppCompatActivity implements IMusicCardListen
                 notifyUI(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1));
             else if (MusicConstants.ACTION_FILE_EXIST.equals(intent.getAction())) {
                 showFileDialog(intent);
+            } else if (MusicConstants.ACTION_DOWNLOAD_MUSIC.equals(intent.getAction())) {
+                Toast.makeText(SongsActivity.this, intent.getStringExtra(MusicConstants.EXTRA_MUSIC_NAME), Toast.LENGTH_SHORT).show();
             }
         }
     }

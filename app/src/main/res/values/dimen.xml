@@ -5,5 +5,5 @@
     <dimen name="album_size">10sp</dimen>
     <dimen name="image_size">70dp</dimen>
     <dimen name="parent_margin">8dp</dimen>
-    <dimen name="component_margin">2dp</dimen>
+    <dimen name="component_margin">1dp</dimen>
 </resources>

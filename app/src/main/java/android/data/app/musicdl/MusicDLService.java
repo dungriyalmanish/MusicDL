@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -31,7 +32,7 @@ public class MusicDLService extends IntentService {
         if (intent.getAction().equals(MusicConstants.ACTION_DOWNLOAD_MUSIC)) {
             String uri_string = intent.getStringExtra(MusicConstants.EXTRA_MUSIC_URI);
             String filename = intent.getStringExtra(MusicConstants.EXTRA_MUSIC_NAME);
-            boolean skip = intent.getBooleanExtra(MusicConstants.EXTRA_SKIP,false);
+            boolean skip = intent.getBooleanExtra(MusicConstants.EXTRA_SKIP, false);
             File loc = new File(FILE_DIR);
             if (!loc.exists()) {
                 loc.mkdirs();
@@ -55,6 +56,7 @@ public class MusicDLService extends IntentService {
                 downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
             }
             downloadManager.enqueue(request);
+            sendBroadcast(new Intent(MusicConstants.ACTION_DOWNLOAD_MUSIC).putExtra(MusicConstants.EXTRA_MUSIC_NAME, filename + " enqueued to download."));
 
         }
     }

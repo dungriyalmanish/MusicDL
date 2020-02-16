@@ -1,7 +1,7 @@
 package android.data.app.musicdl;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.data.app.musicdl.database.MusicData;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,8 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +24,13 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
     List<MusicData> musicDataList;
     MusicData md;
     IMusicCardListener mListener;
+    static int i;
 
     public SongsAdaptor(SongsActivity songsActivity) {
         musicDataList = new ArrayList<>();
         mContext = songsActivity;
         mListener = songsActivity;
+        i = 1;
     }
 
     @NonNull
@@ -46,7 +46,7 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
         holder.name.setText(md.name);
         String temp = md.artist + " | " + md.album + " | " + md.year;
         holder.artist.setText(temp);
-        temp = md.length + " | " + md.downloads + " | " + md.size;
+        temp = (i++) + " | " + md.length + " | " + md.downloads + " | " + md.size;
         holder.album.setText(temp);
         holder.fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,10 +68,10 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
         notifyItemInserted(musicDataList.size());
     }
 
-    public void updateBitmap(Bitmap bitmap, int position) {
-        musicDataList.get(position).setBitmap(bitmap);
-        notifyItemChanged(position);
-
+    public void clearAll() {
+        musicDataList.clear();
+        i=1;
+        notifyDataSetChanged();
     }
 
     public class ViewModel extends RecyclerView.ViewHolder {//implements View.OnClickListener {

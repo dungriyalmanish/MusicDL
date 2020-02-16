@@ -26,8 +26,9 @@
             android:id="@+id/_search_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:hint="@string/search_hint" />
+            android:hint="@string/search_hint"
+            android:inputType="text"
+            android:maxLines="1"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView

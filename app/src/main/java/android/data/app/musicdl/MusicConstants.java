@@ -8,6 +8,7 @@ public class MusicConstants {
     public static final String EXTRA_SKIP = "skip_file_check";
     public static final String EXTRA_MUSIC_DATA = "music_data";
     public static final String EXTRA_MUSIC_NAME = "file_name";
+    public static final String MAX_LIST = "max_list";
 
     public static final int SONG_NAME = 0;
     public static final int ARTIST = 1;
