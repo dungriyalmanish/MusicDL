@@ -17,6 +17,8 @@ import android.text.TextWatcher;
 import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -223,12 +225,51 @@ public class SongsActivity extends AppCompatActivity implements IMusicCardListen
                         Log.v(TAG, "At i=" + i + " error:" + e.getMessage());
                     }
                 }
-                if (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)) == 200)
+                Log.v(TAG, "status received: " + c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)));
+                if (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL)
                     Snackbar.make(findViewById(R.id.container), file + " downloaded", Snackbar.LENGTH_LONG).show();
                 else {
                     Snackbar.make(findViewById(R.id.container), file + " not downloaded", Snackbar.LENGTH_LONG).show();
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.setting_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        songsAdapter.clearAll();
+        switch (item.getItemId()) {
+            case R.id._by_name:
+                musicLoader.sortMusicData(MusicConstants.SORT_BY_NAME);
+                break;
+            case R.id._by_album:
+                musicLoader.sortMusicData(MusicConstants.SORT_BY_ALBUM);
+                break;
+            case R.id._by_artist:
+                musicLoader.sortMusicData(MusicConstants.SORT_BY_ARTIST);
+                break;
+            case R.id._by_downloads:
+                musicLoader.sortMusicData(MusicConstants.SORT_BY_DOWNLOADS);
+                break;
+            case R.id._by_size:
+                musicLoader.sortMusicData(MusicConstants.SORT_BY_SIZE);
+                break;
+            case R.id._by_time:
+                musicLoader.sortMusicData(MusicConstants.SORT_BY_DURATION);
+                break;
+            case R.id._by_year:
+                musicLoader.sortMusicData(MusicConstants.SORT_BY_YEAR);
+                break;
+            default:
+                break;
+
+        }
+        return true;
     }
 }

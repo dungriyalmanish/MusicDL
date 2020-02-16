@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group
+        android:id="@+id/_sort"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/_by_name"
+            android:title="@string/by_name" />
+        <item
+            android:id="@+id/_by_artist"
+            android:title="@string/by_artist" />
+        <item
+            android:id="@+id/_by_downloads"
+            android:title="@string/by_downloads" />
+        <item
+            android:id="@+id/_by_size"
+            android:title="@string/by_size" />
+        <item
+            android:id="@+id/_by_time"
+            android:title="@string/by_time" />
+        <item
+            android:id="@+id/_by_album"
+            android:title="@string/by_album" />
+        <item
+            android:id="@+id/_by_year"
+            android:title="@string/by_year" />
+
+    </group>
+</menu>

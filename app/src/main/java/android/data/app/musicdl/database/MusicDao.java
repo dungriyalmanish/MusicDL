@@ -25,4 +25,25 @@ public interface MusicDao {
 
     @Query("select * from MusicData WHERE name LIKE :search OR artist LIKE :search OR album LIKE :search")
     List<MusicData> search(String search);
+
+    @Query("select * from MusicData ORDER BY name ASC")
+    List<MusicData> sortDataByName();
+
+    @Query("select * from MusicData ORDER BY artist ASC")
+    List<MusicData> sortDataByArtist();
+
+    @Query("select * from MusicData ORDER BY album ASC")
+    List<MusicData> sortDataByAlbum();
+
+    @Query("select * from MusicData ORDER BY length ASC")
+    List<MusicData> sortDataByLength();
+
+    @Query("select * from MusicData ORDER BY size ASC")
+    List<MusicData> sortDataBySIze();
+
+    @Query("select * from MusicData ORDER BY downloads ASC")
+    List<MusicData> sortDataByDownloads();
+
+    @Query("select * from MusicData ORDER BY year DESC")
+    List<MusicData> sortDataByYear();
 }

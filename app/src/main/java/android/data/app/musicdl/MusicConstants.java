@@ -18,4 +18,13 @@ public class MusicConstants {
     public static final int LENGTH = 5;
     public static final int SIZE = 6;
     public static final int DOWNLOADS = 7;
+    public static final int ACTION_ERROR_IN_PARSING = 404;
+    public static final int ACTION_ADD_NEW_CARD = 1001;
+    public static final int SORT_BY_NAME = 11;
+    public static final int SORT_BY_ARTIST = 12;
+    public static final int SORT_BY_ALBUM = 13;
+    public static final int SORT_BY_DURATION = 14;
+    public static final int SORT_BY_SIZE = 15;
+    public static final int SORT_BY_YEAR = 16;
+    public static final int SORT_BY_DOWNLOADS = 17;
 }

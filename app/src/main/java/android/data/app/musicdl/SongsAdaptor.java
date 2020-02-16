@@ -24,13 +24,11 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
     List<MusicData> musicDataList;
     MusicData md;
     IMusicCardListener mListener;
-    static int i;
 
     public SongsAdaptor(SongsActivity songsActivity) {
         musicDataList = new ArrayList<>();
         mContext = songsActivity;
         mListener = songsActivity;
-        i = 1;
     }
 
     @NonNull
@@ -46,7 +44,7 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
         holder.name.setText(md.name);
         String temp = md.artist + " | " + md.album + " | " + md.year;
         holder.artist.setText(temp);
-        temp = (i++) + " | " + md.length + " | " + md.downloads + " | " + md.size;
+        temp = (md.id) + " | " + md.length + " | " + md.downloads + " | " + md.size;
         holder.album.setText(temp);
         holder.fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +68,6 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
 
     public void clearAll() {
         musicDataList.clear();
-        i=1;
         notifyDataSetChanged();
     }
 

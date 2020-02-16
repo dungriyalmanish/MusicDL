@@ -7,11 +7,13 @@ import android.data.app.musicdl.database.MusicDatabase;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -23,6 +25,7 @@ public class MusicLoader extends Handler {
     DbThread dbThread;
     OnlineThread onlineThread;
     SearchThread searchThread;
+    SortingThread sortingThread;
 
     MusicLoader(SongsActivity sv) {
         Log.v(TAG, "MusicLoader");
@@ -59,7 +62,30 @@ public class MusicLoader extends Handler {
     @Override
     public void handleMessage(Message msg) {
         Log.v(TAG, "handle Message msg=" + msg.what);
-        iSV.addNewCard((MusicData) msg.obj);
+        switch (msg.what) {
+            case MusicConstants.ACTION_ERROR_IN_PARSING:
+                Toast.makeText(mContext, "Parsing error at "
+                        + msg.arg1 + "\nMAX value is "
+                        + msg.arg2 + "\nYou should change MAX to "
+                        + msg.arg1, Toast.LENGTH_LONG).show();
+                break;
+            case MusicConstants.ACTION_ADD_NEW_CARD:
+                iSV.addNewCard((MusicData) msg.obj);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void sortMusicData(int sort) {
+        if (md == null) {
+            md = MusicDatabase.getInstance(mContext);
+        }
+        if (sortingThread != null && sortingThread.isAlive()) {
+            sortingThread.stopThread();
+        }
+        sortingThread = new SortingThread(sort);
+        sortingThread.start();
     }
 
     private class DbThread extends Thread {
@@ -82,7 +108,8 @@ public class MusicLoader extends Handler {
                     parseOnline(musicList.size() + 1, size, false);
                 }
                 for (MusicData musicData : musicList) {
-                    if (!exit) Message.obtain(MusicLoader.this, 1001, musicData).sendToTarget();
+                    if (!exit)
+                        Message.obtain(MusicLoader.this, MusicConstants.ACTION_ADD_NEW_CARD, musicData).sendToTarget();
                 }
             } else {
                 parseOnline(1, size, true);
@@ -119,8 +146,8 @@ public class MusicLoader extends Handler {
             MusicData musicData;
             String[] temp = new String[8];
             Log.v(TAG, "Parsing data online...");
-            try {
-                for (int i = start; i <= size; i++) {
+            for (int i = start; i <= size; i++) {
+                try {
                     doc = Jsoup.connect("https://mp3.gisher.org/songs/" + i).get();
                     e = doc.select("dl.details").eq(1).get(0);
                     temp[MusicConstants.ARTIST] = e.childNode(3).childNode(0).childNode(0).toString().trim();
@@ -136,11 +163,13 @@ public class MusicLoader extends Handler {
                     Log.v(TAG, "Loaded: " + md);
                     if (exit) break;
                     //if (post)
-                    Message.obtain(MusicLoader.this, 1001, musicData).sendToTarget();
+                    Message.obtain(MusicLoader.this, MusicConstants.ACTION_ADD_NEW_CARD, musicData).sendToTarget();
+                } catch (Exception ex) {
+                    Log.e(TAG, "error:" + ex);
+                    Message.obtain(MusicLoader.this, MusicConstants.ACTION_ERROR_IN_PARSING, i, size).sendToTarget();
                 }
-            } catch (Exception ex) {
-                Log.e(TAG, "error:" + ex);
             }
+
         }
 
         public void stopThread() {
@@ -160,12 +189,63 @@ public class MusicLoader extends Handler {
         @Override
         public void run() {
             musicDao = md.getMusicDao();
-            List<MusicData> musicList = musicDao.search(search+"%");
+            List<MusicData> musicList = musicDao.search(search + "%");
             for (MusicData musicData : musicList) {
                 if (exit) {
                     break;
                 }
-                Message.obtain(MusicLoader.this, 100, musicData).sendToTarget();
+                Message.obtain(MusicLoader.this, MusicConstants.ACTION_ADD_NEW_CARD, musicData).sendToTarget();
+            }
+        }
+
+        public void stopThread() {
+            exit = true;
+        }
+    }
+
+    private class SortingThread extends Thread {
+        MusicDao musicDao;
+        boolean exit = false;
+        int sort;
+
+        public SortingThread(int sort) {
+            this.sort = sort;
+        }
+
+        @Override
+        public void run() {
+            musicDao = md.getMusicDao();
+            List<MusicData> musicList = new ArrayList<>();
+            switch (sort) {
+                case MusicConstants.SORT_BY_NAME:
+                    musicList = musicDao.sortDataByName();
+                    break;
+                case MusicConstants.SORT_BY_ARTIST:
+                    musicList = musicDao.sortDataByArtist();
+                    break;
+                case MusicConstants.SORT_BY_ALBUM:
+                    musicList = musicDao.sortDataByAlbum();
+                    break;
+                case MusicConstants.SORT_BY_YEAR:
+                    musicList = musicDao.sortDataByYear();
+                    break;
+                case MusicConstants.SORT_BY_DURATION:
+                    musicList = musicDao.sortDataByLength();
+                    break;
+                case MusicConstants.SORT_BY_SIZE:
+                    musicList = musicDao.sortDataBySIze();
+                    break;
+                case MusicConstants.SORT_BY_DOWNLOADS:
+                    musicList = musicDao.sortDataByDownloads();
+                    break;
+                default:
+                    break;
+            }
+            for (MusicData musicData : musicList) {
+                if (exit) {
+                    break;
+                }
+                Message.obtain(MusicLoader.this, MusicConstants.ACTION_ADD_NEW_CARD, musicData).sendToTarget();
             }
         }
 

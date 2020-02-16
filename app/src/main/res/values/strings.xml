@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Music DL</string>
     <string name="search_hint">Search songs here ...</string>
+    <string name="by_name">By Name</string>
+    <string name="by_artist">By Artist</string>
+    <string name="by_downloads">By Downloads</string>
+    <string name="by_size">By Size</string>
+    <string name="by_time">By time</string>
+    <string name="by_album">By Album</string>
+    <string name="by_year">By Year</string>
 </resources>
