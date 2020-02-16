@@ -1,11 +1,13 @@
 package android.data.app.musicdl;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -39,15 +41,17 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewModel holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewModel holder, final int position) {
         md = musicDataList.get(position);
         holder.name.setText(md.name);
-        holder.artist.setText(md.artist);
-        holder.album.setText(md.album);
+        String temp = md.artist + " | " + md.album + " | " + md.year;
+        holder.artist.setText(temp);
+        temp = md.length + " | " + md.downloads + " | " + md.size;
+        holder.album.setText(temp);
         holder.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.v(TAG,"Selected card from Adaptor "+md);
+                Log.v(TAG, "Selected card from Adaptor " + md);
                 mListener.selectedCard(musicDataList.get(position));
             }
         });
@@ -59,12 +63,12 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
     }
 
     public void addData(MusicData musicData) {
-        Log.v(TAG,"Insert "+musicData.toString());
+        Log.v(TAG, "Insert " + musicData.toString());
         musicDataList.add(musicData);
         notifyItemInserted(musicDataList.size());
     }
 
-    public void updateBitmap(Bitmap bitmap, int position){
+    public void updateBitmap(Bitmap bitmap, int position) {
         musicDataList.get(position).setBitmap(bitmap);
         notifyItemChanged(position);
 
@@ -73,7 +77,7 @@ public class SongsAdaptor extends RecyclerView.Adapter<SongsAdaptor.ViewModel> {
     public class ViewModel extends RecyclerView.ViewHolder {//implements View.OnClickListener {
         TextView name, artist, album;
         ImageView icon;
-        FloatingActionButton fab;
+        ImageButton fab;
 
         public ViewModel(@NonNull View itemView) {
             super(itemView);
